@@ -1,0 +1,47 @@
+[
+  {
+    "id": "5",
+    "title": "Movie Night",
+    "amount": 600,
+    "type": "expense",
+    "category": "Entertainment",
+    "date": "2026-09-07",
+    "description": "Weekend movie with friends"
+  },
+  {
+    "id": "4",
+    "title": "Freelance Project",
+    "amount": 4000,
+    "type": "income",
+    "category": "Freelance",
+    "date": "2026-09-05",
+    "description": "Web design project payment"
+  },
+  {
+    "id": "3",
+    "title": "Bus Pass",
+    "amount": 500,
+    "type": "expense",
+    "category": "Transport",
+    "date": "2026-09-04",
+    "description": "College bus pass renewal"
+  },
+  {
+    "id": "2",
+    "title": "Groceries",
+    "amount": 2200,
+    "type": "expense",
+    "category": "Food",
+    "date": "2026-09-03",
+    "description": "Monthly grocery shopping"
+  },
+  {
+    "id": "1",
+    "title": "Monthly Salary",
+    "amount": 25000,
+    "type": "income",
+    "category": "Salary",
+    "date": "2026-09-01",
+    "description": "September salary credited"
+  }
+]

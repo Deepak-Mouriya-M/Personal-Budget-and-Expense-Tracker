@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Personal Budget &amp; Expense Tracker</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/chart.umd.min.js"></script>
+<script>if (typeof Chart === 'undefined') { document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"><\\/script>'); }</script>
+</head>
+<body>
+
+  <!-- Mobile top bar -->
+  <header class="topbar">
+    <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle menu">☰</button>
+    <span class="topbar-title">Budget Tracker</span>
+    <button id="darkModeToggleMobile" class="icon-btn" aria-label="Toggle dark mode">🌙</button>
+  </header>
+
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">💰</span>
+        <span class="brand-text">Budget Tracker</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">📊</span> Dashboard
+        </button>
+        <button class="nav-item" data-page="transactions">
+          <span class="nav-icon">📄</span> Transactions
+        </button>
+        <button class="nav-item" data-page="add">
+          <span class="nav-icon">➕</span> Add Transaction
+        </button>
+        <button class="nav-item" data-page="budget">
+          <span class="nav-icon">🎯</span> Budget
+        </button>
+        <button class="nav-item" data-page="reports">
+          <span class="nav-icon">📈</span> Reports
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <label class="dark-toggle">
+          <input type="checkbox" id="darkModeToggle" />
+          <span>Dark Mode</span>
+        </label>
+      </div>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- ================= DASHBOARD PAGE ================= -->
+      <section class="page active" id="page-dashboard">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Overview of your finances</p>
+
+        <div class="cards-grid">
+          <div class="card card-balance">
+            <div class="card-icon">💼</div>
+            <div class="card-info">
+              <span class="card-label">Total Balance</span>
+              <span class="card-value" id="statBalance">₹0</span>
+            </div>
+          </div>
+          <div class="card card-income">
+            <div class="card-icon">⬆️</div>
+            <div class="card-info">
+              <span class="card-label">Total Income</span>
+              <span class="card-value" id="statIncome">₹0</span>
+            </div>
+          </div>
+          <div class="card card-expense">
+            <div class="card-icon">⬇️</div>
+            <div class="card-info">
+              <span class="card-label">Total Expenses</span>
+              <span class="card-value" id="statExpense">₹0</span>
+            </div>
+          </div>
+          <div class="card card-remaining">
+            <div class="card-icon">🎯</div>
+            <div class="card-info">
+              <span class="card-label">Remaining Budget</span>
+              <span class="card-value" id="statRemaining">₹0</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="budgetWarning" class="budget-warning hidden">
+          ⚠️ You have exceeded your monthly budget!
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Recent Transactions</h2>
+            <button class="btn btn-outline" data-page-link="transactions">View All</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="tx-table" id="recentTxTable">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="recentTxBody">
+                <!-- filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TRANSACTIONS PAGE ================= -->
+      <section class="page" id="page-transactions">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Transactions</h1>
+            <p class="page-subtitle">Search, filter, edit or delete transactions</p>
+          </div>
+          <button class="btn btn-primary" data-page-link="add">+ Add Transaction</button>
+        </div>
+
+        <div class="filters-bar">
+          <input type="text" id="searchInput" placeholder="🔍 Search by title..." />
+          <select id="filterType">
+            <option value="all">All Types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <select id="filterCategory">
+            <option value="all">All Categories</option>
+          </select>
+          <button class="btn btn-outline" id="exportCsvBtn">📥 Export CSV</button>
+        </div>
+
+        <div class="panel">
+          <div class="table-wrapper">
+            <table class="tx-table" id="allTxTable">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="allTxBody">
+                <!-- filled by JS -->
+              </tbody>
+            </table>
+            <p id="noResultsMsg" class="empty-msg hidden">No transactions match your search/filter.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ADD / EDIT TRANSACTION PAGE ================= -->
+      <section class="page" id="page-add">
+        <h1 class="page-title" id="formPageTitle">Add Transaction</h1>
+        <p class="page-subtitle" id="formPageSubtitle">Fill in the details below</p>
+
+        <div class="panel form-panel">
+          <form id="txForm">
+            <input type="hidden" id="txId" />
+
+            <div class="form-row">
+              <label for="txTitle">Title</label>
+              <input type="text" id="txTitle" placeholder="e.g. Grocery Shopping" />
+              <span class="field-error" id="err-title"></span>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-row">
+                <label for="txAmount">Amount (₹)</label>
+                <input type="number" id="txAmount" placeholder="e.g. 500" min="0" step="0.01" />
+                <span class="field-error" id="err-amount"></span>
+              </div>
+
+              <div class="form-row">
+                <label for="txType">Type</label>
+                <select id="txType">
+                  <option value="income">Income</option>
+                  <option value="expense">Expense</option>
+                </select>
+                <span class="field-error" id="err-type"></span>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-row">
+                <label for="txCategory">Category</label>
+                <input type="text" id="txCategory" list="categoryList" placeholder="e.g. Food, Transport, Salary" />
+                <datalist id="categoryList"></datalist>
+                <span class="field-error" id="err-category"></span>
+              </div>
+
+              <div class="form-row">
+                <label for="txDate">Date</label>
+                <input type="date" id="txDate" />
+                <span class="field-error" id="err-date"></span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="txDescription">Description (optional)</label>
+              <textarea id="txDescription" rows="3" placeholder="Add a short note..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitTxBtn">Add Transaction</button>
+              <button type="button" class="btn btn-outline" id="cancelEditBtn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================= BUDGET PAGE ================= -->
+      <section class="page" id="page-budget">
+        <h1 class="page-title">Budget Management</h1>
+        <p class="page-subtitle">Set your monthly budget and track how much is left</p>
+
+        <div class="panel form-panel budget-panel">
+          <form id="budgetForm">
+            <div class="form-row">
+              <label for="budgetInput">Monthly Budget (₹)</label>
+              <input type="number" id="budgetInput" min="0" step="0.01" placeholder="e.g. 15000" />
+              <span class="field-error" id="err-budget"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Budget</button>
+          </form>
+
+          <div class="budget-summary">
+            <div class="budget-summary-row">
+              <span>Monthly Budget</span>
+              <strong id="budgetSummaryTotal">₹0</strong>
+            </div>
+            <div class="budget-summary-row">
+              <span>Spent So Far</span>
+              <strong id="budgetSummarySpent">₹0</strong>
+            </div>
+            <div class="budget-summary-row">
+              <span>Remaining</span>
+              <strong id="budgetSummaryRemaining">₹0</strong>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="budgetProgressFill"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= REPORTS PAGE ================= -->
+      <section class="page" id="page-reports">
+        <h1 class="page-title">Reports</h1>
+        <p class="page-subtitle">Visualize your income and expenses</p>
+
+        <div class="charts-grid">
+          <div class="panel chart-panel">
+            <h2>Expense by Category</h2>
+            <canvas id="categoryPieChart"></canvas>
+          </div>
+          <div class="panel chart-panel">
+            <h2>Income vs Expense</h2>
+            <canvas id="incomeExpenseBarChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast notification container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Delete confirmation modal -->
+  <div class="modal-overlay hidden" id="deleteModalOverlay">
+    <div class="modal">
+      <h3>Delete Transaction?</h3>
+      <p>This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
